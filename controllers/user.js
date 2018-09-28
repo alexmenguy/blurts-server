@@ -2,9 +2,11 @@
 
 const crypto = require("crypto");
 const isemail = require("isemail");
-const HIBP = require("../hibp");
+
 const DB = require("../db/DB");
+const HIBP = require("../hibp");
 const EmailUtils = require("../email-utils");
+const ERRORS = require("../errors");
 const HBSHelpers = require("../hbs-helpers");
 const UNSUB_REASONS = require("../unsubscribe_reasons");
 const sha1 = require("../sha1-utils");
@@ -75,7 +77,7 @@ async function getUnsubscribe(req, res) {
   const subscriber = await DB.getSubscriberByToken(req.query.token);
   //throws error if user backs into and refreshes unsubscribe page
   if (!subscriber) {
-    throw new Error("This email address is not subscribed to Firefox Monitor.");
+    throw new Error(ERRORS["404"].message);
   }
 
   res.render("unsubscribe", {
@@ -93,7 +95,7 @@ async function postUnsubscribe(req, res) {
   const unsubscribedUser = await DB.removeSubscriberByToken(req.body.token, req.body.emailHash);
   // if user backs into unsubscribe page and clicks "unsubscribe" again
   if (!unsubscribedUser) {
-    throw new Error("This email address is not subscribed to Firefox Monitor.");
+    throw new Error(ERRORS["404"].message);
   }
 
   const surveyTicket = crypto.randomBytes(40).toString("hex");
@@ -106,7 +108,7 @@ async function postUnsubscribe(req, res) {
 function getUnsubSurvey(req, res) {
   //throws error if user refreshes unsubscribe survey page after they have submitted an answer
   if(!req.session.unsub) {
-    throw new Error("This email address is not subscribed to Firefox Monitor.");
+    throw new Error(ERRORS["404"].message);
   }
   res.render("unsubscribe_survey", {
   title: "Firefox Monitor: Unsubscribe Survey",

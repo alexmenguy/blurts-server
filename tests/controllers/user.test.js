@@ -4,6 +4,7 @@ const httpMocks = require("node-mocks-http");
 
 const DB = require("../../db/DB");
 const EmailUtils = require("../../email-utils");
+const ERRORS = require("../../errors");
 const getSha1 = require("../../sha1-utils");
 const user = require("../../controllers/user");
 
@@ -88,7 +89,7 @@ test("user verify request with invalid token returns error", async () => {
   });
   const resp = httpMocks.createResponse();
 
-  await expect(user.verify(req, resp)).rejects.toThrow("This email address is not subscribed to Firefox Monitor.");
+  await expect(user.verify(req, resp)).rejects.toThrow(ERRORS["404"].message);
 });
 
 
@@ -131,7 +132,7 @@ test("user unsubscribe GET request with invalid token returns error", async () =
   });
   const resp = httpMocks.createResponse();
 
-  await expect(user.getUnsubscribe(req, resp)).rejects.toThrow("This email address is not subscribed to Firefox Monitor.");
+  await expect(user.getUnsubscribe(req, resp)).rejects.toThrow(ERRORS["404"].message);
 });
 
 
@@ -142,5 +143,5 @@ test("user unsubscribe POST request with invalid token and throws error", async 
   const req = { body: { token: invalidToken, emailHash: invalidHash } };
   const resp = { redirect: jest.fn() };
 
-  await expect(user.postUnsubscribe(req, resp)).rejects.toThrow("This email address is not subscribed to Firefox Monitor.");
+  await expect(user.postUnsubscribe(req, resp)).rejects.toThrow(ERRORS["404"].message);
 });
