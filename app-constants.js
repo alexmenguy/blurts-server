@@ -6,6 +6,7 @@ const path = require("path");
 require("dotenv").load({path: path.join(__dirname, ".env")});
 
 const kEnvironmentVariables = [
+  "AVAILABLE_LANGUAGES",
   "NODE_ENV",
   "DISABLE_DOCKERFLOW",
   "SERVER_URL",

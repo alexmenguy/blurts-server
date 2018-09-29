@@ -11,7 +11,7 @@ const url = require("url");
 const EmailUtils = require("./email-utils");
 const HBSHelpers = require("./hbs-helpers");
 const HIBP = require("./hibp");
-const {logErrors, clientErrorHandler, errorHandler} = require("./middleware");
+const {pickLanguage, logErrors, clientErrorHandler, errorHandler} = require("./middleware");
 const mozlog = require("./log");
 
 const HibpRoutes = require("./routes/hibp");
@@ -92,6 +92,7 @@ if (app.get("env") === "dev") {
 app.locals.FXA_ENABLED = AppConstants.FXA_ENABLED;
 app.locals.SERVER_URL = AppConstants.SERVER_URL;
 app.locals.UTM_SOURCE = url.parse(AppConstants.SERVER_URL).hostname;
+app.locals.AVAILABLE_LANGUAGES = AppConstants.AVAILABLE_LANGUAGES;
 
 app.use(sessions({
   cookieName: "session",
@@ -100,6 +101,8 @@ app.use(sessions({
   activeDuration: 5 * 60 * 1000, // 5 minutes
   cookie: cookie,
 }));
+
+app.use(pickLanguage);
 
 if (!AppConstants.DISABLE_DOCKERFLOW) {
   const DockerflowRoutes = require("./routes/dockerflow");
@@ -114,9 +117,7 @@ app.use("/ses", SesRoutes);
 app.use("/user", UserRoutes);
 app.use("/", HomeRoutes);
 
-app.use(logErrors);
-app.use(clientErrorHandler);
-app.use(errorHandler);
+app.use(logErrors, clientErrorHandler, errorHandler);
 
 EmailUtils.init().then(() => {
   const listener = app.listen(AppConstants.PORT, () => {
